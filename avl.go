@@ -1,36 +1,25 @@
 package avl
 
-import (
-	"fmt"
-)
+/*
+ * Simple AVL tree with parent pointers in node included.
+ * All nodes are also put on a sorted linked list. This allows search for range
+ * of values.
+ */
 
-type avlNode struct {
+type Node struct {
 	Key			Interface
 	Height			int
-	Lchild, Rchild, Parent	*avlNode
-	Smaller, Bigger		*avlNode // Neighbor in sorted array
+	Lchild, Rchild, Parent	*Node
+	Smaller, Bigger		*Node // Neighbor in sorted array
 }
+
+type Tree **Node
 
 type Interface interface {
 	Compare(b Interface) int
 }
 
-type Key struct {
-	val int
-}
-
-func (a *Key) Compare(b Interface) int {
-	bval := b.(*Key).val
-	switch {
-	case a.val > bval:
-		return 1
-	case a.val < bval:
-		return -1
-	}
-	return 0
-}
-
-func leftRotate(root *avlNode) *avlNode {
+func leftRotate(root *Node) *Node {
 	node := root.Rchild
 
 	root.Rchild = node.Lchild
@@ -47,13 +36,13 @@ func leftRotate(root *avlNode) *avlNode {
 	return node
 }
 
-func leftRigthRotate(root *avlNode) *avlNode {
+func leftRigthRotate(root *Node) *Node {
 	root.Lchild = leftRotate(root.Lchild)
 	root = rightRotate(root)
 	return  root
 }
 
-func rightRotate(root *avlNode) *avlNode {
+func rightRotate(root *Node) *Node {
 	node := root.Lchild
 
 	root.Lchild = node.Rchild
@@ -70,13 +59,13 @@ func rightRotate(root *avlNode) *avlNode {
 	return node
 }
 
-func rightLeftRotate(root *avlNode) *avlNode {
+func rightLeftRotate(root *Node) *Node {
 	root.Rchild = rightRotate(root.Rchild)
 	root = leftRotate(root)
 	return  root
 }
 
-func Height(root *avlNode) int {
+func Height(root *Node) int {
 	if root != nil {
 		return root.Height
 	}
@@ -90,11 +79,7 @@ func max(a, b int) int {
 	return b
 }
 
-/*
- * TODO tohle se musi volat jenom jednou pro kazdy node, ne po kazdem vyvazeni v
- * rekurzi!
- */
-func updateLinks(node *avlNode) {
+func updateLinks(node *Node) {
 	/* Fix the links to sorted neighbors */
 	neighbor := findSuccessor(node)
 	if neighbor != nil {
@@ -118,17 +103,20 @@ func updateLinks(node *avlNode) {
 
 }
 
-func Insert(root *avlNode, key Interface) *avlNode {
+func insertTree(tree **Node, key Interface) *Node {
+	root := *tree
+	var node *Node
+
 	if root == nil {
-		root = &avlNode{key, 0, nil, nil, nil, nil, nil}
+		root = &Node{key, 0, nil, nil, nil, nil, nil}
 		root.Height = max(Height(root.Lchild), Height(root.Rchild)) + 1
+		*tree = root
 		return root
 	}
 
 	if key.Compare(root.Key) < 0 {
-		root.Lchild = Insert(root.Lchild, key)
+		node = insertTree(&root.Lchild, key)
 		root.Lchild.Parent = root
-		updateLinks(root.Lchild)
 		if Height(root.Lchild)-Height(root.Rchild) == 2 {
 			if key.Compare(root.Lchild.Key) < 0 {
 				root = rightRotate(root)
@@ -139,9 +127,8 @@ func Insert(root *avlNode, key Interface) *avlNode {
 	} 
 
 	if key.Compare(root.Key) > 0 {
-		root.Rchild = Insert(root.Rchild, key)
+		node = insertTree(&root.Rchild, key)
 		root.Rchild.Parent = root
-		updateLinks(root.Rchild)
 		if Height(root.Rchild)-Height(root.Lchild) == 2 {
 			if key.Compare(root.Rchild.Key) > 0 {
 				root = leftRotate(root)
@@ -152,19 +139,34 @@ func Insert(root *avlNode, key Interface) *avlNode {
 	}
 
 	root.Height = max(Height(root.Lchild), Height(root.Rchild)) + 1
-	return root
+	*tree = root
+	return node
 }
 
-func findMinimum(node *avlNode) *avlNode {
-	if node.Lchild != nil {
-		return findMinimum(node.Lchild)
+func Insert(tree Tree, key Interface) *Node {
+	node := insertTree(tree, key)
+	if node != nil {
+		updateLinks(node)
 	}
 	return node
 }
 
-func findMaximum(node *avlNode) *avlNode {
+/*
+ * The left-most node from the current node.
+ */
+func FindMinimum(node *Node) *Node {
+	if node.Lchild != nil {
+		return FindMinimum(node.Lchild)
+	}
+	return node
+}
+
+/*
+ * The right-most node from the current node.
+ */
+func FindMaximum(node *Node) *Node {
 	if node.Rchild != nil {
-		return findMaximum(node.Rchild)
+		return FindMaximum(node.Rchild)
 	}
 	return node
 }
@@ -172,11 +174,9 @@ func findMaximum(node *avlNode) *avlNode {
 /*
  * Find node with value next bigger to the current node.
  */
-func findSuccessor(node *avlNode) *avlNode {
+func findSuccessor(node *Node) *Node {
 	if node.Rchild != nil {
-		fmt.Println("successor ", thisKey(node),
-		    " rchild != nil")
-		return findMinimum(node.Rchild)
+		return FindMinimum(node.Rchild)
 	}
 
 	parent := node.Parent
@@ -186,18 +186,15 @@ func findSuccessor(node *avlNode) *avlNode {
 		parent = this.Parent
 	}
 
-	fmt.Println("successor ", thisKey(node), " is ", thisKey(parent))
 	return parent
 }
 
 /*
  * Find node with value next bigger to the current node.
  */
-func findPredecessor(node *avlNode) *avlNode {
+func findPredecessor(node *Node) *Node {
 	if node.Lchild != nil {
-		fmt.Println("predecessor ", thisKey(node),
-		    " lchild != nil")
-		return findMaximum(node.Lchild)
+		return FindMaximum(node.Lchild)
 	}
 
 	parent := node.Parent
@@ -207,62 +204,30 @@ func findPredecessor(node *avlNode) *avlNode {
 		parent = this.Parent
 	}
 
-	fmt.Println("predecessor ", thisKey(node), " is ", thisKey(parent))
 	return parent
 }
 
-type action func(node *avlNode)
+type Walker func(node *Node)
 
-func inOrder(root *avlNode, action action) {
+/*
+ * Call given function on all nodes in the tree.
+ * Depth-first walk.
+ */
+func Walk(tree Tree, action Walker) {
+	root := *tree
 	if root == nil {
 		return
 	}
 
-	inOrder(root.Lchild, action)
+	Walk(&root.Lchild, action)
 	action(root)
-	inOrder(root.Rchild, action)
+	Walk(&root.Rchild, action)
 }
 
-func parentKey(node *avlNode) int {
-	if node.Parent != nil {
-		return node.Parent.Key.(*Key).val
-	}
-	return -1
-}
-
-func biggerKey(node *avlNode) int {
-	if node.Bigger != nil {
-		return node.Bigger.Key.(*Key).val
-	}
-	return -1
-}
-
-func thisKey(node *avlNode) int {
-	if node != nil {
-		return node.Key.(*Key).val
-	}
-	return -1
-}
-
-func AvlTest() {
-	var root *avlNode
- //	keys := []int{2, 6, 1, 3, 5, 7, 16, 15, 14, 13, 12, 11, 8, 9, 10}
- 	keys := []int{2, 6, 5}
-	for _, key := range keys {
-		root = Insert(root, &Key{key})
-	}
-
-	inOrder(root, func(node *avlNode) {
-		fmt.Println(thisKey(node), parentKey(node), Height(node),
-		biggerKey(node))
-	})
-
-	node := findMinimum(root)
-	for node != nil {
-		fmt.Println(thisKey(node))
-		if thisKey(node) == 6 {
-			panic(1)
-		}
-		node = node.Bigger
-	}
+/*
+ * Empty tree is nil.
+ */
+func Create() Tree {
+	var result *Node
+	return &result
 }
