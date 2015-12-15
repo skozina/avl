@@ -40,21 +40,26 @@ func thisKey(node *Node) int {
 	return -1
 }
 
-func Test() {
+func Example() {
 	tree := Create()
 	keys := []int{2, 6, 1, 3, 5, 7, 16, 15, 14, 13, 12, 11, 8, 9, 10}
 	for _, key := range keys {
+		fmt.Println("Insert ", key)
 		Insert(tree, &Key{key})
 	}
 
+	fmt.Println("Walk the tree:")
 	Walk(tree, func(node *Node) {
-		fmt.Println(thisKey(node), parentKey(node), Height(node),
-		biggerKey(node))
+		fmt.Println("Node: ", thisKey(node),
+		    "Parent: ", parentKey(node),
+		    "Height: ", Height(node),
+		    "Next bigger: ", biggerKey(node))
 	})
 
+	fmt.Println("Walk tree from smallest node:")
 	node := FindMinimum(*tree)
 	for node != nil {
-		fmt.Println(thisKey(node))
+		fmt.Println("Node: ", thisKey(node))
 		node = node.Bigger
 	}
 }
