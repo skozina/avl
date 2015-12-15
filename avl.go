@@ -231,3 +231,53 @@ func Create() Tree {
 	var result *Node
 	return &result
 }
+
+/*
+ * Find given node or the one next smaller.
+ */
+func FindSmaller(tree Tree, key Interface) *Node {
+	root := *tree;
+
+	if root == nil {
+		return root
+	}
+
+	if key.Compare(root.Key) < 0 {
+		if root.Lchild != nil {
+			return FindSmaller(&root.Lchild, key)
+		}
+		return root.Smaller
+	}
+	if key.Compare(root.Key) > 0 {
+		if root.Rchild != nil {
+			return FindSmaller(&root.Rchild, key)
+		}
+		return root
+	}
+	return root
+}
+
+/*
+ * Find given node or the one next bigger.
+ */
+func FindBigger(tree Tree, key Interface) *Node {
+	root := *tree;
+
+	if root == nil {
+		return root
+	}
+
+	if key.Compare(root.Key) < 0 {
+		if root.Lchild != nil {
+			return FindBigger(&root.Lchild, key)
+		}
+		return root
+	}
+	if key.Compare(root.Key) > 0 {
+		if root.Rchild != nil {
+			return FindBigger(&root.Rchild, key)
+		}
+		return root.Bigger
+	}
+	return root
+}

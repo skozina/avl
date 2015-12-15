@@ -62,4 +62,44 @@ func Example() {
 		fmt.Println("Node: ", thisKey(node))
 		node = node.Bigger
 	}
+
+	fmt.Println("FindSmaller 0: ")
+	node = FindSmaller(tree, &Key{0})
+	fmt.Println(thisKey(node))
+
+	fmt.Println("FindSmaller 1: ")
+	node = FindSmaller(tree, &Key{1})
+	fmt.Println(thisKey(node))
+
+	fmt.Println("FindSmaller 3: ")
+	node = FindSmaller(tree, &Key{3})
+	fmt.Println(thisKey(node))
+
+	fmt.Println("FindSmaller 4: ")
+	node = FindSmaller(tree, &Key{4})
+	fmt.Println(thisKey(node))
+
+	fmt.Println("FindSmaller 5: ")
+	node = FindSmaller(tree, &Key{5})
+	fmt.Println(thisKey(node))
+
+	fmt.Println("FindBigger 0: ")
+	node = FindBigger(tree, &Key{0})
+	fmt.Println(thisKey(node))
+
+	fmt.Println("FindBigger 1: ")
+	node = FindBigger(tree, &Key{1})
+	fmt.Println(thisKey(node))
+
+	fmt.Println("FindBigger 3: ")
+	node = FindBigger(tree, &Key{3})
+	fmt.Println(thisKey(node))
+
+	fmt.Println("FindBigger 4: ")
+	node = FindBigger(tree, &Key{4})
+	fmt.Println(thisKey(node))
+
+	fmt.Println("FindBigger 5: ")
+	node = FindBigger(tree, &Key{5})
+	fmt.Println(thisKey(node))
 }
