@@ -49,11 +49,12 @@ func Example() {
 	}
 
 	fmt.Println("Walk the tree:")
-	Walk(tree, func(node *Node) {
+	Walk(tree, func(node *Node) bool {
 		fmt.Println("Node: ", thisKey(node),
-		    "Parent: ", parentKey(node),
-		    "Height: ", Height(node),
-		    "Next bigger: ", biggerKey(node))
+			"Parent: ", parentKey(node),
+			"Height: ", Height(node),
+			"Next bigger: ", biggerKey(node))
+		return true
 	})
 
 	fmt.Println("Walk tree from smallest node:")

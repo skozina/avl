@@ -7,10 +7,10 @@ package avl
  */
 
 type Node struct {
-	Key			Interface
-	Height			int
-	Lchild, Rchild, Parent	*Node
-	Smaller, Bigger		*Node // Neighbor in sorted array
+	Key                    Interface
+	Height                 int
+	Lchild, Rchild, Parent *Node
+	Smaller, Bigger        *Node // Neighbor in sorted array
 }
 
 type Tree **Node
@@ -39,7 +39,7 @@ func leftRotate(root *Node) *Node {
 func leftRigthRotate(root *Node) *Node {
 	root.Lchild = leftRotate(root.Lchild)
 	root = rightRotate(root)
-	return  root
+	return root
 }
 
 func rightRotate(root *Node) *Node {
@@ -62,7 +62,7 @@ func rightRotate(root *Node) *Node {
 func rightLeftRotate(root *Node) *Node {
 	root.Rchild = rightRotate(root.Rchild)
 	root = leftRotate(root)
-	return  root
+	return root
 }
 
 func Height(root *Node) int {
@@ -124,7 +124,7 @@ func insertTree(tree **Node, key Interface) *Node {
 				root = leftRigthRotate(root)
 			}
 		}
-	} 
+	}
 
 	if key.Compare(root.Key) > 0 {
 		node = insertTree(&root.Rchild, key)
@@ -207,21 +207,28 @@ func findPredecessor(node *Node) *Node {
 	return parent
 }
 
-type Walker func(node *Node)
+type Walker func(node *Node) bool
 
 /*
  * Call given function on all nodes in the tree.
  * Depth-first walk.
  */
-func Walk(tree Tree, action Walker) {
+func Walk(tree Tree, action Walker) bool {
 	root := *tree
 	if root == nil {
-		return
+		return true
 	}
 
-	Walk(&root.Lchild, action)
-	action(root)
-	Walk(&root.Rchild, action)
+	if Walk(&root.Lchild, action) == false {
+		return false
+	}
+	if action(root) == false {
+		return false
+	}
+	if Walk(&root.Rchild, action) == false {
+		return false
+	}
+	return true
 }
 
 /*
@@ -236,7 +243,7 @@ func Create() Tree {
  * Find given node or the one next smaller.
  */
 func FindSmaller(tree Tree, key Interface) *Node {
-	root := *tree;
+	root := *tree
 
 	if root == nil {
 		return root
@@ -261,7 +268,7 @@ func FindSmaller(tree Tree, key Interface) *Node {
  * Find given node or the one next bigger.
  */
 func FindBigger(tree Tree, key Interface) *Node {
-	root := *tree;
+	root := *tree
 
 	if root == nil {
 		return root
