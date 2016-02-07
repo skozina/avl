@@ -288,3 +288,15 @@ func FindBigger(tree Tree, key Interface) *Node {
 	}
 	return root
 }
+
+func (node *Node) Next() *Node {
+	return node.Bigger
+}
+
+func (node *Node) Prev() *Node {
+	return node.Smaller
+}
+
+func (node *Node) Value() Interface {
+	return node.Key
+}
